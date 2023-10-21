@@ -1,80 +1,113 @@
-import pygame
 import random
+import pygame
 
-background_color = (0, 0, 0)
+isStart = True
 
-width = 1280
-height = 720
+def main():
+    pygame.init()
 
-player_Speed = 10
+    background_color = (0, 0, 0)
+    text_Font = pygame.font.SysFont("Arial", 30)
 
-pygame.init()
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Ping Pong")
-running = True
+    width = 1000
+    height = 600
 
-clock = pygame.time.Clock()
-timer_Event = pygame.USEREVENT + 1
-delay = 10
-pygame.time.set_timer(timer_Event, delay)
+    circle_Speed = 2
+    circle_Max_Speed = 5
+    platform_Speed = 7
 
-box_left = pygame.Rect(10, 0, 30, 500)
-box_right = pygame.Rect(width - 40, 0, 30, 500)
-
-player_X = width / 2
-player_Y = height / 2
-
-player_X_Dir = 1
-player_Y_Dir = 1
-
-while running:
-    clock.tick(60)
-    for event in pygame.event.get():
-
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == timer_Event:
-            if player_X == box_right.x:
-                player_X_Dir = -1
-                player_Y_Dir = random.randint(-1, 1)
-                if player_Y_Dir == 0:
-                    player_Y_Dir = random.randint(-1, 1)
-
-            elif player_X == box_left.x:
-                player_X_Dir = 1
-                player_Y_Dir = random.randint(-1, 1)
-                if player_Y_Dir == 0:
-                    player_Y_Dir = random.randint(-1, 1)
-
-            if player_Y == 0:
-                player_Y_Dir = 1
-
-            if player_Y == height:
-                player_Y_Dir = -1
-
-            player_X += 1 * player_X_Dir
-            player_Y += 1 * player_Y_Dir
-
-    keys = pygame.key.get_pressed()
-
-    if keys[pygame.K_w]:
-        box_left.y -= 10
-
-    if keys[pygame.K_s]:
-        box_left.y += 10
-
-    if keys[pygame.K_UP]:
-        box_right.y -= 10
-
-    if keys[pygame.K_DOWN]:
-        box_right.y += 10
-
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption("PingPong")
     screen.fill(background_color)
-    pygame.draw.rect(screen, (255, 0, 0), box_left)
-    pygame.draw.rect(screen, (0, 255, 0), box_right)
-
-    #player
-    player_Pos = player_X , player_Y
-    pygame.draw.circle(screen, (0, 0, 255), player_Pos, 10)
-
     pygame.display.flip()
+
+    clock = pygame.time.Clock()
+    timer_Event = pygame.USEREVENT + 1
+    delay = 10
+    pygame.time.set_timer(timer_Event, delay)
+
+    running = True
+
+    platform_Rect = pygame.Rect((width - 40), 10, 30, 300)
+    platform_Min_Size = 50
+
+    pos_X = width / 2
+    pos_Y = height / 2
+
+    circle_Pos = pos_X, pos_Y
+
+    circle_X_Dir = 1
+    circle_Y_Dir = 1
+
+    point = 0
+
+    get_Point = True
+
+    while running:
+        clock.tick(60)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == timer_Event:
+                pos_X += 1 * circle_Speed * circle_X_Dir
+                pos_Y += 1 * circle_Speed * circle_Y_Dir
+
+        if pos_X > width:
+            main()
+
+        collider = platform_Rect.collidepoint(circle_Pos)
+        if collider:
+            if get_Point == True:
+                point += 1
+                if platform_Rect.height > platform_Min_Size:
+                    platform_Rect.height -= 10
+                if circle_Speed < circle_Max_Speed:
+                    circle_Speed += 0.5
+
+            get_Point = False
+            circle_X_Dir = -1
+            circle_Y_Dir = random.randint(-1, 1)
+            pygame.display.flip()
+
+        if (pos_X <= 10):
+            get_Point = True
+            circle_X_Dir = 1
+            circle_Y_Dir = random.randint(-1, 1)
+            pygame.display.flip()
+
+        if circle_Y_Dir == 0:
+            circle_Y_Dir = 1
+
+        if pos_Y < 10:
+            circle_Y_Dir = 1
+
+        if pos_Y > height - 10:
+            circle_Y_Dir = -1
+
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_UP]:
+            if platform_Rect.y > 0:
+                platform_Rect.y -= 1 * platform_Speed
+
+        if keys[pygame.K_DOWN]:
+            if platform_Rect.y + platform_Rect.height < height:
+                platform_Rect.y += 1 * platform_Speed
+
+        screen.fill(background_color)
+
+        pygame.draw.rect(screen, (0, 255, 0), platform_Rect)
+
+        circle_Pos = pos_X, pos_Y
+        pygame.draw.circle(screen, (255, 0, 0), circle_Pos, 10)
+
+        point_Text = text_Font.render(str(point), True, (0, 255, 0))
+        screen.blit(point_Text, (width / 2 - point_Text.get_width() / 2, 30))
+
+        pygame.display.flip()
+        pygame.display.update()
+
+if __name__ == '__main__':
+    if isStart == True:
+        main()
+        isStart = False

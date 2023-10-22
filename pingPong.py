@@ -1,8 +1,6 @@
 import random
 import pygame
 
-isStart = True
-
 def main():
     pygame.init()
 
@@ -19,7 +17,6 @@ def main():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("PingPong")
     screen.fill(background_color)
-    pygame.display.flip()
 
     clock = pygame.time.Clock()
     timer_Event = pygame.USEREVENT + 1
@@ -52,28 +49,26 @@ def main():
                 pos_X += 1 * circle_Speed * circle_X_Dir
                 pos_Y += 1 * circle_Speed * circle_Y_Dir
 
-        if pos_X > width:
-            main()
-
         collider = platform_Rect.collidepoint(circle_Pos)
         if collider:
             if get_Point == True:
                 point += 1
-                if platform_Rect.height > platform_Min_Size:
-                    platform_Rect.height -= 10
-                if circle_Speed < circle_Max_Speed:
-                    circle_Speed += 0.5
+            if platform_Rect.height > platform_Min_Size:
+                platform_Rect.height -= 10
+            if circle_Speed < circle_Max_Speed:
+                circle_Speed += 0.5
 
             get_Point = False
             circle_X_Dir = -1
             circle_Y_Dir = random.randint(-1, 1)
-            pygame.display.flip()
 
-        if (pos_X <= 10):
+        if (pos_X <= 0):
             get_Point = True
             circle_X_Dir = 1
             circle_Y_Dir = random.randint(-1, 1)
-            pygame.display.flip()
+
+        if pos_X > width:
+            pygame.quit()
 
         if circle_Y_Dir == 0:
             circle_Y_Dir = 1
@@ -105,9 +100,7 @@ def main():
         screen.blit(point_Text, (width / 2 - point_Text.get_width() / 2, 30))
 
         pygame.display.flip()
-        pygame.display.update()
 
 if __name__ == '__main__':
-    if isStart == True:
-        main()
-        isStart = False
+    main()
+    pygame.quit()
